@@ -1,0 +1,17 @@
+---
+# Path to the data to be uploaded relative to the repo's root
+agd_relative_src_path: '/path/to/data/relative/to/project'
+# Path to the repo base on local machine
+agd_absolute_project_path: '/basepath/to/project/'
+# GitLab private access token if repo is private
+agd_git_token: ''
+# Destination folder on remote machine
+agd_data_dest: '/tmp/'
+# Owner of files on remote machine
+agd_owner: 'root'
+# Group of files on remote machine
+agd_group: 'root'
+# Mode of files on remote machine
+agd_mode: 755
+# Time for process to finish
+agd_timeout: 7200

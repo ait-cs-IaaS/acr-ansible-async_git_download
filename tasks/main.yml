@@ -1,0 +1,22 @@
+---
+- name: Combine Git URL and relative path
+  ansible.builtin.set_fact:
+    git_archive:
+      '{{ agd_relative_src_path | git_download_url(agd_absolute_project_path,
+      agd_git_token) }}'
+    temp_id:
+      "{{ query('community.general.random_string',
+      override_all='0123456789ABCDEF') | first }}"
+  delegate_to: localhost
+
+- name: Asyncronous download Files from git
+  become: true
+  ansible.builtin.shell: |
+    mkdir -p {{ agd_data_dest }} &&
+    wget -O /tmp/tmp_{{ temp_id }}.tar.gz {{ git_archive.url }} &&
+    tar -xvf /tmp/tmp_{{ temp_id }}.tar.gz --strip-components={{ git_archive.length }} -C {{ agd_data_dest }}/ &&
+    chown {{ agd_owner }}:{{ agd_group }} {{ agd_data_dest }}/ -R &&
+    chmod {{ agd_mode }} {{ agd_data_dest }}/ -R &&
+    rm /tmp/tmp_{{ temp_id }}.tar.gz && history -c
+  async: '{{ agd_timeout }}'
+  poll: 0

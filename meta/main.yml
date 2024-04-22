@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Lenhard Reuter
+  description: Downloads folders from gitlab asyncronously.
+  company: Austrian Institute of Technology (AIT)
+
+  license: GPL-3.0
+  min_ansible_version: 2.1
+
+  galaxy_tags:
+    - gitlab
+    - download
+    - async
+
+  dependencies: []
