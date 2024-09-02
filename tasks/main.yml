@@ -1,6 +1,7 @@
 ---
 
 - name: Commit all files to deploy
+  become: false
   ansible.builtin.shell: |
     git add . && 
     git commit -m "Automated Commit by Ansible: Update data files to deploy" && 
@@ -9,7 +10,6 @@
     chdir: "{{ agd_absolute_project_path }}/{{ agd_relative_src_path }}"
   ignore_errors: true
   register: git_output
-  
   failed_when: >
     git_output.rc != 0 and 
       (
