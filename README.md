@@ -2,7 +2,7 @@
 
 AIT-CyberRange: Downloads folders from gitlab asyncronously (fire and forget).
 
-**IMPORTANT:** Files and folders must be pushed before executing this role.
+**IMPORTANT:** If `agd_allow_local_git_pushes` not set to false, files will be commited and pushed automatically using your local credentials.
 
 > This role currently only works with gitlab. Support for github will follow.
 
@@ -31,6 +31,10 @@ agd_group: 'root'
 agd_mode: 755
 # Time for process to finish
 agd_timeout: 7200
+# per default, download folder, if set to content, only the content and subfolders are downloaded
+agd_download_mode: 'directory'
+# Allow local git-pushes.
+agd_allow_local_git_pushes: true
 ```
 
 ## Example Playbook

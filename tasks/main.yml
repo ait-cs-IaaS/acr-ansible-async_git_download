@@ -1,4 +1,24 @@
 ---
+
+- name: Commit all files to deploy
+  ansible.builtin.shell: |
+    git add . && 
+    git commit -m "Automated Commit by Ansible: Update data files to deploy" && 
+    git push
+  args:
+    chdir: "{{ agd_absolute_project_path }}/{{ agd_relative_src_path }}"
+  ignore_errors: true
+  register: git_output
+  
+  failed_when: >
+    git_output.rc != 0 and 
+      (
+        ("Your branch is up to date" not in git_output.stdout) and
+        ("nothing to commit, working tree clean" not in git_output.stdout)
+      )
+  delegate_to: localhost
+  when: agd_allow_local_git_pushes
+  
 - name: Combine Git URL and relative path
   ansible.builtin.set_fact:
     git_archive:
@@ -9,12 +29,16 @@
       override_all='0123456789ABCDEF') | first }}"
   delegate_to: localhost
 
+- name: Set component-strip
+  ansible.builtin.set_fact:
+    components_strip: "{{ git_archive.length - 1 if agd_download_mode == 'directory' else git_archive.length }}"
+
 - name: Asyncronous download Files from git
   become: true
   ansible.builtin.shell: |
     mkdir -p {{ agd_data_dest }} &&
     wget -O /tmp/tmp_{{ temp_id }}.tar.gz {{ git_archive.url }} &&
-    tar -xvf /tmp/tmp_{{ temp_id }}.tar.gz --strip-components={{ git_archive.length }} -C {{ agd_data_dest }}/ &&
+    tar -xvf /tmp/tmp_{{ temp_id }}.tar.gz --strip-components={{ components_strip }} -C {{ agd_data_dest }}/ &&
     chown {{ agd_owner }}:{{ agd_group }} {{ agd_data_dest }}/ -R &&
     chmod {{ agd_mode }} {{ agd_data_dest }}/ -R &&
     rm /tmp/tmp_{{ temp_id }}.tar.gz && history -c
