@@ -8,17 +8,19 @@
     git push
   args:
     chdir: "{{ agd_absolute_project_path }}/{{ agd_relative_src_path }}"
-  ignore_errors: true
   register: git_output
-  failed_when: >
-    git_output.rc != 0 and 
-      (
-        ("Your branch is up to date" not in git_output.stdout) and
-        ("nothing to commit, working tree clean" not in git_output.stdout)
-      )
+  failed_when:
+    - git_output.rc != 0 
+    - '"Your branch is up to date" not in git_output.stdout'
+    - '"nothing to commit, working tree clean" not in git_output.stdout'
+    - '"No such file or directory" not in git_output.msg'
   delegate_to: localhost
   when: agd_allow_local_git_pushes
-  
+
+- ansible.builtin.debug:
+    msg: "Failed to find files in: {{ agd_absolute_project_path }}/{{ agd_relative_src_path }} ... [skipping following tasks]"
+  when: '"No such file or directory" in git_output.msg'
+
 - name: Combine Git URL and relative path
   ansible.builtin.set_fact:
     git_archive:
@@ -28,10 +30,12 @@
       "{{ query('community.general.random_string',
       override_all='0123456789ABCDEF') | first }}"
   delegate_to: localhost
+  when: '"No such file or directory" not in git_output.msg'
 
 - name: Set component-strip
   ansible.builtin.set_fact:
     components_strip: "{{ git_archive.length - 1 if agd_download_mode == 'directory' else git_archive.length }}"
+  when: '"No such file or directory" not in git_output.msg'
 
 - name: Asyncronous download Files from git
   become: true
@@ -44,3 +48,4 @@
     rm /tmp/tmp_{{ temp_id }}.tar.gz && history -c
   async: '{{ agd_timeout }}'
   poll: 0
+  when: '"No such file or directory" not in git_output.msg'
