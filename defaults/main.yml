@@ -17,5 +17,3 @@ agd_mode: 755
 agd_timeout: 7200
 # per default, download folder, if set to content, only the content and subfolders are downloaded
 agd_download_mode: 'directory'
-# Allow local git-pushes.
-agd_allow_local_git_pushes: true
