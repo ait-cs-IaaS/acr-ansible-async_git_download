@@ -20,10 +20,12 @@
       "{{ query('community.general.random_string',
       override_all='0123456789ABCDEF') | first }}"
   delegate_to: localhost
+  when: file_stat.stat.exists
 
 - name: Set component-strip
   ansible.builtin.set_fact:
     components_strip: "{{ git_archive.length - 1 if agd_download_mode == 'directory' else git_archive.length }}"
+  when: file_stat.stat.exists
 
 - name: Asyncronous download Files from git
   become: true
@@ -36,3 +38,4 @@
     rm /tmp/tmp_{{ temp_id }}.tar.gz && history -c
   async: '{{ agd_timeout }}'
   poll: 0
+  when: file_stat.stat.exists
